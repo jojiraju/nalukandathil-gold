@@ -6,6 +6,8 @@ import Why from "@/components/Why";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import GoldRate from "@/components/GoldRate";
+import DetailModal from "@/components/DetailModal";
 import Gallery from "@/components/Gallery";
 import Testimonials from "@/components/Testimonials";
 import Marquee from "@/components/Marquee";
@@ -21,6 +23,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <Collections />
+        <GoldRate />
         <Products />
         <Why />
         <About />
@@ -29,6 +32,7 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
+      <DetailModal />
     </>
   );
 }

@@ -8,6 +8,7 @@ import { ease } from "./fx";
 
 const links = [
   { href: "#collections", label: "Collections" },
+  { href: "#rate", label: "Gold Rate" },
   { href: "#pieces", label: "Pieces" },
   { href: "#story", label: "Our Story" },
   { href: "#visit", label: "Showroom" },
@@ -98,7 +99,7 @@ export default function Header() {
 
       <div className="wrap nav">
         <nav className="nav-side left" aria-label="Primary">
-          {links.slice(0, 3).map((l) => (
+          {links.slice(0, 4).map((l) => (
             <a key={l.label} href={l.href} className={isActive(l) ? "active" : ""}>
               {l.label}
             </a>

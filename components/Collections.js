@@ -5,10 +5,18 @@ import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 
 import { site } from "@/lib/site";
 import Photo from "./Photo";
 import { Lines, spotMove, useDesktop } from "./fx";
+import { openDetail } from "./DetailModal";
 
 function Card({ c, i, n }) {
   return (
-    <a href="#pieces" data-cat={c.title} className="cx-card spot" onPointerMove={spotMove}>
+    <div
+      role="button"
+      tabIndex={0}
+      className="cx-card spot"
+      onPointerMove={spotMove}
+      onClick={() => openDetail({ title: c.title, image: c.image, focus: c.focus, tag: c.tag, description: c.description || c.blurb, category: c.title, showAll: true })}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), e.currentTarget.click())}
+    >
       <Photo item={{ ...c, name: c.title }} ratio="fill" sizes="(max-width: 700px) 80vw, 460px" />
       <span className="cx-tag">{c.tag}</span>
       <span className="cx-num">0{i + 1}<small> / 0{n}</small></span>
@@ -17,7 +25,7 @@ function Card({ c, i, n }) {
         <p>{c.blurb}</p>
         <span className="cx-go">Explore <i>→</i></span>
       </div>
-    </a>
+    </div>
   );
 }
 

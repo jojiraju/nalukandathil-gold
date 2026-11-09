@@ -1,16 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
 import { site } from "@/lib/site";
 import Photo from "./Photo";
 import Reveal from "./Reveal";
 import { Lines, ease, spotMove } from "./fx";
+import { describe, openDetail } from "./DetailModal";
 
 const cats = ["All", ...Array.from(new Set(site.products.map((p) => p.category)))];
 
+// Round thumbnail for each category (collection photo; Earrings and All use their own).
+const thumbs = {
+  All: { src: "/images/look-noir.png", pos: "36% 62%", zoom: 1.5 },
+  Earrings: { src: "/site/gallery-2.webp", pos: "50% 70%", zoom: 1.2 },
+};
+function thumbFor(c) {
+  if (thumbs[c]) return thumbs[c];
+  const col = site.collections.find((x) => x.title === c);
+  const prod = site.products.find((x) => x.category === c);
+  const src = col?.image || prod?.image;
+  return { src, pos: col?.focus || prod?.focus || "50% 50%", zoom: 1.15 };
+}
+const countOf = (c) => (c === "All" ? site.products.length : site.products.filter((p) => p.category === c).length);
+
 // 3D tilt that follows the cursor (mouse only) + gold spotlight.
-function Tilt({ children }) {
+function Tilt({ children, onOpen }) {
   const ref = useRef(null);
   const rx = useMotionValue(0);
   const ry = useMotionValue(0);
@@ -33,6 +49,11 @@ function Tilt({ children }) {
     <motion.div
       ref={ref}
       className="pb-in spot"
+      role="button"
+      tabIndex={0}
+      aria-label="View details"
+      onClick={onOpen}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onOpen())}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 1000 }}
       onPointerMove={move}
       onPointerLeave={leave}
@@ -64,26 +85,45 @@ export default function Products() {
   return (
     <section id="pieces" className="section pb">
       <div className="wrap">
-        <div className="pb-head">
-          <div>
-            <p className="kicker">Selected pieces</p>
-            <h2>
-              <Lines lines={[<>The <em>edit</em></>]} />
-            </h2>
-            <Reveal as="p" className="sec-sub left">
-              Sample designs shown. Message us for current stock, weight and today’s rate.
-            </Reveal>
-          </div>
-
-          <div className="pb-seg" role="tablist">
-            {cats.map((c) => (
-              <button key={c} role="tab" aria-selected={cat === c} className={cat === c ? "on" : ""} onClick={() => setCat(c)}>
-                {cat === c && <motion.i layoutId="seg-pill" className="seg-pill" transition={{ duration: 0.5, ease }} />}
-                <span>{c}</span>
-              </button>
-            ))}
-          </div>
+        <div className="sec-head center">
+          <p className="kicker">Selected pieces</p>
+          <h2>
+            <Lines lines={[<>The <em>edit</em></>]} />
+          </h2>
+          <Reveal as="p" className="sec-sub">
+            Sample designs shown. Message us for current stock, weight and today’s rate.
+          </Reveal>
         </div>
+
+        <div className="pc-rail" role="tablist" aria-label="Filter by category">
+          {cats.map((c) => {
+            const t = thumbFor(c);
+            const on = cat === c;
+            return (
+              <button key={c} role="tab" aria-selected={on} className={`pc-chip ${on ? "on" : ""}`} onClick={() => setCat(c)}>
+                <span className="pc-ring">
+                  {on && <motion.i layoutId="pc-ring" className="pc-ring-on" transition={{ duration: 0.55, ease }} />}
+                  <span className="pc-img">
+                    <Image
+                      src={t.src}
+                      alt=""
+                      fill
+                      sizes="100px"
+                      style={{ objectFit: "cover", objectPosition: t.pos, transformOrigin: t.pos, transform: `scale(${t.zoom})` }}
+                    />
+                  </span>
+                  <b className="pc-count">{countOf(c)}</b>
+                </span>
+                <span className="pc-label">{c}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="pc-status" aria-live="polite">
+          Showing <strong>{shown.length}</strong> {shown.length === 1 ? "piece" : "pieces"}
+          {cat === "All" ? "" : ` in ${cat}`}
+        </p>
 
         <motion.div layout className={`pb-grid ${cat === "All" ? "bento" : ""}`}>
           <AnimatePresence mode="popLayout">
@@ -98,7 +138,19 @@ export default function Products() {
                 exit={{ opacity: 0, scale: 0.94 }}
                 transition={{ duration: 0.7, ease, delay: (i % 4) * 0.07 }}
               >
-                <Tilt>
+                <Tilt
+                  onOpen={() =>
+                    openDetail({
+                      title: p.name,
+                      image: p.image,
+                      focus: p.focus,
+                      tag: p.category,
+                      material: p.purity,
+                      description: p.description || describe(p.category),
+                      category: p.category,
+                    })
+                  }
+                >
                   <Photo item={p} ratio="fill" sizes="(max-width: 700px) 100vw, 50vw" />
                   <span className="pb-cat">{p.category}</span>
                   <div className="pb-info">
@@ -106,7 +158,7 @@ export default function Products() {
                       <h3>{p.name}</h3>
                       <span>{p.purity}</span>
                     </div>
-                    <a href={enquire(p)} target="_blank" rel="noopener noreferrer" className="pb-enq" aria-label={`Enquire about ${p.name}`}>
+                    <a href={enquire(p)} target="_blank" rel="noopener noreferrer" className="pb-enq" aria-label={`Enquire about ${p.name}`} onClick={(e) => e.stopPropagation()}>
                       ↗
                     </a>
                   </div>
