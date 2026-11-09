@@ -734,3 +734,22 @@ h1 em, h2 em { display: inline; }
 @media (min-width: 800px) { .tm-grid { grid-template-columns: 1fr 1fr; } }
 .gl-item:last-child { grid-column: 1 / -1; }
 @media (min-width: 700px) { .gl-item:last-child { grid-column: span 2; } }
+
+/* ───────── Mobile menu fixes ───────── */
+/* Clip the decorative glow so the menu never scrolls sideways; only scroll vertically if content truly overflows. */
+.mobile-menu { height: 100vh; height: 100dvh; overflow-x: clip; overflow-y: auto; overscroll-behavior: contain; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+.mobile-menu::before { right: -20vmin; }
+@media (max-height: 700px) {
+  .mobile-menu { gap: 18px; padding-top: calc(var(--bar) + var(--header) + 12px); }
+  .mobile-menu .mm-row a { font-size: clamp(2rem, 9vw, 2.8rem); }
+}
+
+/* Clean close (X) button: no stray focus box, true 45° cross */
+.burger { -webkit-tap-highlight-color: transparent; border-radius: 0; }
+.burger:focus { outline: none; }
+.burger:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+.burger span { width: 26px; height: 1.5px; }
+.burger span:last-child { width: 16px; }
+.burger.open { align-items: center; }
+.burger.open span:first-child { transform: translateY(4.25px) rotate(45deg); }
+.burger.open span:last-child { width: 26px; transform: translateY(-4.25px) rotate(-45deg); }
