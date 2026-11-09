@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { site } from "@/lib/site";
 import { ease } from "./fx";
@@ -76,6 +77,9 @@ export default function Header() {
     };
   }, [open]);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const isActive = (l) => active === l.href.slice(1);
 
   return (
@@ -134,6 +138,8 @@ export default function Header() {
         </button>
       </div>
 
+      {/* Rendered into <body> so it covers the whole screen (incl. under Safari's bottom bar), independent of the header. */}
+      {mounted && createPortal(
       <AnimatePresence>
         {open && (
           <motion.div
@@ -187,7 +193,9 @@ export default function Header() {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </motion.header>
   );
 }
